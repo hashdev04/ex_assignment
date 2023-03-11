@@ -52,8 +52,10 @@ defmodule ExAssignment.Todos do
         nil
 
       todos ->
+        n = length(todos)
+
         get_weighted_tuples(todos)
-        |> Prob.weighted_random()
+        |> Prob.weighted_random(n)
         |> List.first()
     end
   end
