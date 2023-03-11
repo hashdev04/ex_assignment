@@ -7,6 +7,7 @@ defmodule ExAssignment.Todos do
   alias ExAssignment.Repo
 
   alias ExAssignment.Todos.Todo
+  alias ExAssignment.ProbabilityWeight, as: Prob
 
   @doc """
   Returns the list of todos, optionally filtered by the given type.
@@ -47,8 +48,13 @@ defmodule ExAssignment.Todos do
   def get_recommended() do
     list_todos(:open)
     |> case do
-      [] -> nil
-      todos -> Enum.take_random(todos, 1) |> List.first()
+      [] ->
+        nil
+
+      todos ->
+        get_weighted_tuples(todos)
+        |> Prob.weighted_random()
+        |> List.first()
     end
   end
 
@@ -165,5 +171,14 @@ defmodule ExAssignment.Todos do
       |> Repo.update_all([])
 
     :ok
+  end
+
+  # Helpers
+
+  defp get_weighted_tuples(todos) do
+    weights = Enum.map(todos, & &1.priority) |> Enum.reverse()
+
+    Enum.with_index(weights)
+    |> Enum.map(fn {weight, index} -> {Enum.at(todos, index), weight} end)
   end
 end
